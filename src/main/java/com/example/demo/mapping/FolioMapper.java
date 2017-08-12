@@ -4,35 +4,28 @@ import com.example.demo.domain.KeyValue;
 import org.springframework.util.CollectionUtils;
 
 import java.beans.Statement;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by biba on 12/08/2017.
- */
 public class FolioMapper<T> {
 
-    private Class<T> mapperClass;
+    private Class<T> targetClass;
     private List<KeyValue> customValues;
 
     public FolioMapper(Class<T> mappedClass) {
-        this.mapperClass = mappedClass;
+        this.targetClass = mappedClass;
     }
 
     public FolioMapper(Class<T> mapperClass, List<KeyValue> customValues) {
-        this.mapperClass = mapperClass;
+
+        this.targetClass = mapperClass;
         this.customValues = customValues;
     }
 
     public T map(List<KeyValue> keyValueList) {
-        T toReturn = null;
-        try {
-            toReturn = mapperClass.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        T toReturn = createTargetClassInstance(targetClass);
+
         // fields
         for (KeyValue xmlValue : keyValueList) {
             mapAttribute(toReturn, xmlValue);
@@ -65,5 +58,34 @@ public class FolioMapper<T> {
             toReturn.add(bean);
         }
         return toReturn;
+    }
+
+
+    private T createTargetClassInstance(Class<T> targetClass){
+        T targetClassInstance;
+        boolean hasDefaultConstructor = false;
+
+        if(targetClass == null) {
+            throw new IllegalArgumentException("Target class should be not null !");
+        }
+
+        for(Constructor constructor: targetClass.getConstructors()){
+            if(constructor.getParameterCount() == 0)
+                hasDefaultConstructor = true;
+        }
+
+        if(!hasDefaultConstructor){
+            throw new IllegalArgumentException(String.format("Target class %s doesn't have a default constructor", targetClass.getCanonicalName()));
+        }
+
+        try {
+            targetClassInstance = targetClass.newInstance();
+        } catch (InstantiationException e) {
+            throw new IllegalArgumentException(String.format("Instantiation of Target class %s failed : %s", targetClass.getCanonicalName(), e.getMessage()));
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException(String.format("Instantiation of Target class %s failed : %s", targetClass.getCanonicalName(), e.getMessage()));
+        }
+        return targetClassInstance;
+
     }
 }

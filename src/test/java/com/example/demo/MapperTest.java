@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by biba on 12/08/2017.
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 public class MapperTest {
 

@@ -9,6 +9,14 @@ public class Benchmark {
     private String name;
     private BenchmarkType type;
 
+    public Benchmark() {    }
+
+    public Benchmark(Integer id, String name, BenchmarkType type) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+    }
+
     public Integer getId() {
         return id;
     }
